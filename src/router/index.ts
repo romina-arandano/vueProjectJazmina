@@ -13,7 +13,23 @@ const router = createRouter({
   routes,
 })
 
-// Workaround for https://github.com/vitejs/vite/issues/11804
+// ✅ Función para verificar si hay token
+const isAuthenticated = (): boolean => {
+  return !!localStorage.getItem('token')
+}
+
+// ✅ Middleware global: proteger rutas
+router.beforeEach((to, from, next) => {
+  // Permitimos el acceso libre solo al login ("/")
+  if (to.path !== '/' && !isAuthenticated()) {
+    console.warn('Acceso denegado. Redirigiendo a login.')
+    next('/')
+  } else {
+    next()
+  }
+})
+
+// Workaround para error de importación dinámica
 router.onError((err, to) => {
   if (err?.message?.includes?.('Failed to fetch dynamically imported module')) {
     if (!localStorage.getItem('vuetify:dynamic-reload')) {
