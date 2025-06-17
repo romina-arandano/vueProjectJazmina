@@ -21,7 +21,8 @@ const isAuthenticated = (): boolean => {
 // ✅ Middleware global: proteger rutas
 router.beforeEach((to, from, next) => {
   // Permitimos el acceso libre solo al login ("/")
-  if (to.path !== '/' && !isAuthenticated()) {
+  const publicPages = ['/', '/login']
+if (!publicPages.includes(to.path) && !isAuthenticated()) {
     console.warn('Acceso denegado. Redirigiendo a login.')
     next('/')
   } else {
