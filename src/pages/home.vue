@@ -48,16 +48,17 @@ const openDialog = async (id = null) => {
 }
 
 const save = async () => {
+    console.log('Formulario enviado:', form)
   try {
     if (form.id) {
       await axios.put(`membresias/${form.id}`, form)
     } else {
-      await axios.post('membresia', form)
+      await axios.post('membresias', form)
     }
     dialog.value = false
     loadMembresias()
   } catch (err) {
-    console.error('❌ Error al guardar:', err)
+    console.error('Error al guardar:', err)
   }
 }
 
@@ -67,7 +68,7 @@ const deleteMembresia = async (id) => {
     await axios.delete(`membresias/${id}`)
     loadMembresias()
   } catch (err) {
-    console.error('❌ Error al eliminar:', err)
+    console.error('Error al eliminar:', err)
   }
 }
 
