@@ -28,9 +28,14 @@ const navigate = (route: string) => {
         <v-list-item-title>🏠 Inicio</v-list-item-title>
       </v-list-item>
 
+      <v-list-item @click="navigate('/usuarios')" link>
+        <v-list-item-title>👤 Usuarios</v-list-item-title>
+      </v-list-item>
+
       <v-list-item @click="navigate('/perfil')" link>
         <v-list-item-title>👤 Perfil</v-list-item-title>
       </v-list-item>
+      
     </v-list>
   </v-navigation-drawer>
 </template>
