@@ -32,8 +32,8 @@ const navigate = (route: string) => {
         <v-list-item-title>👤 Usuarios</v-list-item-title>
       </v-list-item>
 
-      <v-list-item @click="navigate('/perfil')" link>
-        <v-list-item-title>👤 Perfil</v-list-item-title>
+      <v-list-item @click="navigate('/clases')" link>
+        <v-list-item-title>📚 Clases</v-list-item-title>
       </v-list-item>
       
     </v-list>
