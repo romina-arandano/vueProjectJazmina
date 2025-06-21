@@ -35,6 +35,15 @@ const navigate = (route: string) => {
       <v-list-item @click="navigate('/clases')" link>
         <v-list-item-title>📚 Clases</v-list-item-title>
       </v-list-item>
+
+      <v-list-item @click="navigate('/asistencias')" link>
+        <v-list-item-title>✏️ Asistencias </v-list-item-title>
+      </v-list-item>
+
+      <v-list-item @click="navigate('/pagos')" link>
+        <v-list-item-title>💸 Pagos </v-list-item-title>
+      </v-list-item>
+ 
       
     </v-list>
   </v-navigation-drawer>
