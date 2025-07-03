@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import axios from '../config/axios'
 import { useRouter } from 'vue-router'
 import NavigationDrawer from '@/components/NavigationDrawer.vue'
@@ -8,16 +8,15 @@ const drawer = ref(true)
 const dialog = ref(false)
 const asistencias = ref([])
 const clases = ref([])
-const usuarios = ref([])
+const clientes = ref([])
 const profesores = ref([])
-const membresias = ref([])
+const membresiasUsuario = ref([]) // ← solo las del usuario seleccionado
 const router = useRouter()
 
 const form = reactive({
   id: 0,
   id_clase: null,
   id_usuario: null,
-  id_profesor: null,
   id_membresia: null
 })
 
@@ -34,6 +33,7 @@ const openDialog = async (id = null) => {
   if (id) {
     const res = await axios.get(`asistencias/${id}`)
     Object.assign(form, res.data)
+    await loadMembresiasByUsuario(form.id_usuario) // Cargar membresías del usuario si ya existe
   } else {
     Object.assign(form, {
       id: 0,
@@ -42,6 +42,7 @@ const openDialog = async (id = null) => {
       id_profesor: null,
       id_membresia: null
     })
+    membresiasUsuario.value = [] // limpiar
   }
   dialog.value = true
 }
@@ -53,15 +54,12 @@ const save = async () => {
     } else {
       await axios.post('asistencias', form)
     }
-
     dialog.value = false
     loadAsistencias()
   } catch (err) {
     console.error('Error al guardar:', err)
-
-    if (err.response && err.response.status === 422) {
-      console.warn('Errores de validación:', err.response.data.errors)
-      alert('Errores de validación. Checa la consola')
+    if (err.response?.status === 422) {
+      alert('Errores de validación. Revisa la consola.')
     }
   }
 }
@@ -82,10 +80,13 @@ const loadAsistencias = () => {
     .catch(err => console.error(err))
 }
 
-const loadUsuarios = () => {
-  axios.get('usuarios')
-    .then(res => usuarios.value = res.data.data)
-    .catch(err => console.error(err))
+const loadClientes = () => {
+  axios.get('clientes')
+    .then(res => {
+      console.log('Clientes desde API:', res.data)
+      clientes.value = res.data.data
+    })
+    .catch(err => console.error('Error al cargar clientes:', err))
 }
 
 const loadProfesores = () => {
@@ -100,20 +101,29 @@ const loadClases = () => {
     .catch(err => console.error(err))
 }
 
-const loadMembresias = () => {
-  axios.get('membresias')
-    .then(res => membresias.value = res.data.data)
-    .catch(err => console.error(err))
+const loadMembresiasByUsuario = async (id_usuario) => {
+  if (!id_usuario) return membresiasUsuario.value = []
+  try {
+    const res = await axios.get(`membresias/por-usuario/${id_usuario}`)
+    membresiasUsuario.value = res.data.data
+  } catch (err) {
+    console.error('Error al cargar membresías por usuario:', err)
+  }
 }
+
+// Ver cambios de usuario en tiempo real:
+watch(() => form.id_usuario, (nuevoUsuario) => {
+  loadMembresiasByUsuario(nuevoUsuario)
+})
 
 onMounted(() => {
   loadAsistencias()
-  loadUsuarios()
+  loadClientes()
   loadProfesores()
   loadClases()
-  loadMembresias()
 })
 </script>
+
 
 <template>
   <v-app>
@@ -155,26 +165,18 @@ onMounted(() => {
                 />
                 <v-select
                   v-model="form.id_usuario"
-                  :items="usuarios"
+                  :items="clientes"
                   item-title="name"
                   item-value="id"
-                  label="Usuario"
-                />
-                <v-select
-                  v-model="form.id_profesor"
-                  :items="profesores"
-                  item-title="name"
-                  item-value="id"
-                  label="Profesor"
+                  label="Cliente"
                 />
                 <v-select
                   v-model="form.id_membresia"
-                  :items="membresias"
+                  :items="membresiasUsuario"
                   item-title="id"
                   item-value="id"
-                  label="Membresía (opcional)"
+                  label="Membresía del usuario"
                 />
-
               </v-form>
             </v-card-text>
             <v-card-actions>

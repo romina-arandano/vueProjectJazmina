@@ -8,17 +8,17 @@ const drawer = ref(true)
 const router = useRouter()
 const dialog = ref(false)
 const membresias = ref([])
-const usuarios = ref([])
+const clientes = ref([])
+
 
 const form = reactive({
   id: 0,
   id_usuario: null,
-  clases_adquiridas: 0,
-  clases_disponibles: 0,
-  clases_ocupadas: 0,
+  clases_adquiridas: 0
 })
 
 const headers = [
+  { title: 'ID', value: 'id' },
   { title: 'Nombre del cliente', value: 'cliente' },
   { title: 'Clases adquiridas', value: 'clases_adquiridas' },
   { title: 'Disponibles', value: 'clases_disponibles' },
@@ -34,21 +34,32 @@ const logout = () => {
 const openDialog = async (id = null) => {
   if (id) {
     const res = await axios.get(`membresias/${id}`)
-    Object.assign(form, res.data)
+    const m = res.data
+    Object.assign(form, {
+      id: m.id,
+      id_usuario: m.id_usuario,
+      clases_adquiridas: m.clases_adquiridas
+    })
   } else {
     Object.assign(form, {
       id: 0,
       id_usuario: null,
-      clases_adquiridas: 0,
-      clases_disponibles: 0,
-      clases_ocupadas: 0,
+      clases_adquiridas: 0
     })
   }
   dialog.value = true
 }
 
+const loadClientes = () => {
+  axios.get('clientes')
+    .then(res => {
+      console.log('Clientes desde API:', res.data)
+      clientes.value = res.data.data
+    })
+    .catch(err => console.error('Error al cargar clientes:', err))
+}
+
 const save = async () => {
-    console.log('Formulario enviado:', form)
   try {
     if (form.id) {
       await axios.put(`membresias/${form.id}`, form)
@@ -62,7 +73,7 @@ const save = async () => {
   }
 }
 
-const deleteMembresia = async (id) => {
+const deleteMembresia = async (id: any) => {
   if (!confirm('¿Eliminar esta membresía?')) return
   try {
     await axios.delete(`membresias/${id}`)
@@ -78,15 +89,10 @@ const loadMembresias = () => {
     .catch(err => console.error(err))
 }
 
-const loadUsuarios = () => {
-  axios.get('usuarios') // o la ruta que devuelva usuarios
-    .then(res => usuarios.value = res.data.data)
-    .catch(err => console.error(err))
-}
 
 onMounted(() => {
   loadMembresias()
-  loadUsuarios()
+  loadClientes()
 })
 </script>
 
@@ -121,26 +127,16 @@ onMounted(() => {
             </v-card-title>
             <v-card-text>
               <v-form>
-                <v-select
-                  v-model="form.id_usuario"
-                  :items="usuarios"
-                  item-title="name"
-                  item-value="id"
-                  label="Usuario"
+                 <v-select
+                    v-model="form.id_usuario"
+                    :items="clientes"
+                    item-title="name"
+                    item-value="id"
+                    label="Cliente"
                 />
                 <v-text-field
                   v-model="form.clases_adquiridas"
                   label="Clases adquiridas"
-                  type="number"
-                />
-                <v-text-field
-                  v-model="form.clases_disponibles"
-                  label="Clases disponibles"
-                  type="number"
-                />
-                <v-text-field
-                  v-model="form.clases_ocupadas"
-                  label="Clases ocupadas"
                   type="number"
                 />
               </v-form>

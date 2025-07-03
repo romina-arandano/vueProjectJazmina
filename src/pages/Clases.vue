@@ -15,9 +15,9 @@ const form = reactive({
   fecha: '',
   tipo: '',
   lugares: 0,
-  lugares_ocupados: 0,
-  lugares_disponibles: 0,
   id_profesor: null,
+  lugares_ocupados: 0, // <-- default en 0
+  lugares_disponibles: 0, // <-- default igual
 })
 
 const headers = [
@@ -40,8 +40,6 @@ const openDialog = async (id = null) => {
       fecha: '',
       tipo: '',
       lugares: 0,
-      lugares_ocupados: 0,
-      lugares_disponibles: 0,
       id_profesor: null,
     })
   }
@@ -50,6 +48,9 @@ const openDialog = async (id = null) => {
 
 const save = async () => {
   try {
+    form.lugares_ocupados = 0
+    form.lugares_disponibles = form.lugares 
+
     if (form.id) {
       await axios.put(`clases/${form.id}`, form)
     } else {
@@ -63,7 +64,7 @@ const save = async () => {
 
     if (err.response && err.response.status === 422) {
       console.warn('Errores de validación:', err.response.data.errors)
-      alert('Errores de validación. Checa la consola 🙈')
+      alert('Errores de validación. Checa la consola')
     }
   }
 }
@@ -93,6 +94,8 @@ const loadProfesores = () => {
     })
     .catch(err => console.error('Error al cargar profesores:', err))
 }
+
+
 
 
 
@@ -136,8 +139,6 @@ onMounted(() => {
                 <v-text-field v-model="form.fecha" label="Fecha" type="date" />
                 <v-text-field v-model="form.tipo" label="Tipo de clase" />
                 <v-text-field v-model="form.lugares" label="Lugares" type="number" />
-                <v-text-field v-model="form.lugares_ocupados" label="Ocupados" type="number" />
-                <v-text-field v-model="form.lugares_disponibles" label="Disponibles" type="number" />
                 <v-select
                     v-model="form.id_profesor"
                     :items="profesores"
